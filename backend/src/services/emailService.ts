@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-export const sendAppointmentEmail = async (email: string, slot: Date, appointmentId: any) => {
+export const sendAppointmentEmail = async (email: string, slot: Date, _appointmentId: any) => {
   try {
     await transporter.sendMail({
       from: process.env.SMTP_USER,
@@ -28,10 +28,10 @@ export const sendAppointmentEmail = async (email: string, slot: Date, appointmen
 };
 
 export const sendPaymentConfirmation = async (
-    email: string,
-    slot: Date,
+    _email: string,
+    _slot: Date,
     appointmentId: number,
-    type: 'confirmation' | 'reminder' = 'confirmation') => {
+    _type: 'confirmation' | 'reminder' = 'confirmation') => {
   const appointment = await prisma.appointment.findUnique({
     where: { id: appointmentId },
     include: { patient: true, doctor: true, schedule: true }

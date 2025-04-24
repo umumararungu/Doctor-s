@@ -24,12 +24,16 @@ model Schedule {
   startTime   DateTime
   endTime     DateTime
   isBooked    Boolean  @default(false)
+  appointment Appointment?
 }
 
 model Appointment {
   id          Int      @id @default(autoincrement())
+  doctorId    Int
   doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  patientId   Int
   patient     Patient  @relation(fields: [patientId], references: [id])
+  scheduleId  Int      @unique
   schedule    Schedule @relation(fields: [scheduleId], references: [id])
   paymentId   String?
   status      String   @default("pending")

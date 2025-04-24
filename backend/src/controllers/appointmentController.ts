@@ -7,9 +7,14 @@ export const bookAppointment = async (req: Request, res: Response) => {
   const { doctorId, patientId, scheduleId } = req.body;
 
   try {
+    // Convert IDs to numbers
+    const numericDoctorId = Number(doctorId);
+    const numericPatientId = Number(patientId);
+    const numericScheduleId = Number(scheduleId);
+
     // 1. Validate slot availability
     const schedule = await prisma.schedule.findUnique({
-      where: { id: scheduleId },
+      where: { id: numericScheduleId },
       include: { doctor: true }
     });
 
@@ -18,19 +23,19 @@ export const bookAppointment = async (req: Request, res: Response) => {
     }
 
     // 2. Create appointment record
-    const appointment = await prisma.$transaction(async (tx: { schedule: { update: (arg0: { where: { id: any; }; data: { isBooked: boolean; }; }) => any; }; appointment: { create: (arg0: { data: { doctorId: any; patientId: any; scheduleId: any; status: string; }; include: { patient: boolean; schedule: boolean; }; }) => any; }; }) => {
+    const appointment = await prisma.$transaction(async (tx: { schedule: { update: (arg0: { where: { id: number; }; data: { isBooked: boolean; }; }) => any; }; appointment: { create: (arg0: { data: { doctorId: number; patientId: number; scheduleId: number; status: string; }; include: { patient: boolean; schedule: boolean; }; }) => any; }; }) => {
       // Mark slot as booked immediately
       await tx.schedule.update({
-        where: { id: scheduleId },
+        where: { id: numericScheduleId },
         data: { isBooked: true }
       });
 
       // Create the appointment
       return await tx.appointment.create({
         data: {
-          doctorId,
-          patientId,
-          scheduleId,
+          doctorId: numericDoctorId,
+          patientId: numericPatientId,
+          scheduleId: numericScheduleId,
           status: 'pending'
         },
         include: {
@@ -42,10 +47,10 @@ export const bookAppointment = async (req: Request, res: Response) => {
 
     // 3. Add to processing queue
     await addAppointmentToQueue({
-        email: patient!.email,
-        slot: schedule.startTime,
-        appointmentId: appointment.id,
-        type: 'confirmation'
+      email: appointment.patient.email, // Fixed: using appointment.patient.email
+      slot: schedule.startTime,
+      appointmentId: appointment.id,
+      type: 'confirmation'
     });
 
     // 4. Prepare response
@@ -75,12 +80,13 @@ export const bookAppointment = async (req: Request, res: Response) => {
 export const updateAppointmentStatus = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { status, reason } = req.body;
+  const numericId = Number(id);
 
   try {
-    const result = await prisma.$transaction(async (tx: { appointment: { update: (arg0: { where: { id: number; }; data: { status: any; cancellationReason: any; }; include: { schedule: boolean; }; }) => any; }; schedule: { update: (arg0: { where: { id: any; }; data: { isBooked: boolean; }; }) => any; }; patient: { findUnique: (arg0: { where: { id: any; }; }) => any; }; }) => {
+    const result = await prisma.$transaction(async (tx: { appointment: { update: (arg0: { where: { id: number; }; data: { status: any; cancellationReason: any; }; include: { schedule: boolean; }; }) => any; }; schedule: { update: (arg0: { where: { id: any; }; data: { isBooked: boolean; }; }) => any; }; }) => {
       // 1. Update appointment
       const appointment = await tx.appointment.update({
-        where: { id: Number(id) },
+        where: { id: numericId },
         data: { 
           status,
           cancellationReason: status === 'cancelled' ? reason : null
@@ -98,13 +104,10 @@ export const updateAppointmentStatus = async (req: Request, res: Response) => {
         });
 
         // Send cancellation email
-        const patient = await tx.patient.findUnique({
-          where: { id: appointment.patientId }
-        });
-
-        if (patient) {
+        if (appointment.patient) {
           await sendPaymentConfirmation(
-            patient.email
+            appointment.patient.email,
+            appointment,
             `Your appointment has been cancelled. ${reason ? `Reason: ${reason}` : ''}`
           );
         }
@@ -123,13 +126,13 @@ export const updateAppointmentStatus = async (req: Request, res: Response) => {
   }
 };
 
-// New endpoint for appointment details
 export const getAppointment = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const numericId = Number(id);
 
   try {
     const appointment = await prisma.appointment.findUnique({
-      where: { id: Number(id) },
+      where: { id: numericId },
       include: {
         doctor: {
           select: {
