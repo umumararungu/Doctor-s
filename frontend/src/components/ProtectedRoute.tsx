@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { JSX } from 'react/jsx-runtime';
 
 export default function ProtectedRoute({ children, role }: { children: JSX.Element, role?: string }) {
   const navigate = useNavigate();

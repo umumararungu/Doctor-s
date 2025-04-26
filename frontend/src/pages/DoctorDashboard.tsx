@@ -1,11 +1,12 @@
+import { Doctor } from '../types/types';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import ScheduleCalendar from '../doctor/ScheduleCalendar';
-import DoctorAppointments from '../doctor/DoctorAppointments';
+import ScheduleCalendar from '../components/doctor/ScheduleCalendar';
+import AppointmentList from '../components/doctor/AppointmentList';
 
 export default function DoctorDashboard() {
-  const [doctor, setDoctor] = useState(null);
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function DoctorDashboard() {
       <h1>Dr. {doctor.name}'s Dashboard</h1>
       <div className="dashboard-grid">
         <ScheduleCalendar doctorId={doctor.id} />
-        <DoctorAppointments doctorId={doctor.id} />
+        <AppointmentList doctorId={doctor.id} mode={'doctor'} />
       </div>
     </div>
   );

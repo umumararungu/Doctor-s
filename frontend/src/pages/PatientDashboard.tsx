@@ -1,11 +1,12 @@
+import { Patient } from '../types/types';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import DoctorSearch from '../patient/DoctorSearch';
-import AppointmentList from '../patient/AppointmentList';
+import DoctorSearch from '../components/patient/DoctorSearch';
+import AppointmentList from '../components/doctor/AppointmentList';
 
 export default function PatientDashboard() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<Patient | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function PatientDashboard() {
       <h1>Welcome, {user.name}</h1>
       <div className="dashboard-content">
         <DoctorSearch />
-        <AppointmentList patientId={user.id} />
+        <AppointmentList patientId={user.id} mode={'doctor'} />
       </div>
     </div>
   );

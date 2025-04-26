@@ -22,6 +22,8 @@ export interface User {
     endTime: Date;
     status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
     paymentId?: string;
+    patient?: Patient;  // Optional nested patient data
+    doctor?: Doctor;    // Optional nested doctor data
   }
   
   export interface ScheduleSlot {
@@ -30,6 +32,9 @@ export interface User {
     startTime: Date;
     endTime: Date;
     isBooked: boolean;
+    name:string;
+    email:string;
+    specialty:string;
   }
   
   export interface PaymentIntent {
@@ -40,3 +45,16 @@ export interface User {
     clientSecret: string;
   }
   
+  export interface Patient {
+    id: number;
+    name: string;
+    email: string;
+    // ... other patient fields
+  }
+  
+  export interface Doctor {
+    id: number;
+    name: string;
+    specialty: string;
+    // ... other doctor fields
+  }

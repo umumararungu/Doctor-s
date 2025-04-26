@@ -28,10 +28,12 @@ export default function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/auth/register', formData);
-      navigate('/login');
-    } catch (err) {
-      setError('Registration failed');
+      const response = await api.post('/auth/register', formData);
+      if (response.status === 201) {
+        navigate('/login');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Registration failed');
     }
   };
 

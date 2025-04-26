@@ -1,16 +1,20 @@
+// src/services/auth.ts
 import api from './api';
 
-export const login = async (email: string, password: string) => {
-  const response = await api.post('/auth/login', { email, password, role: 'patient' });
-  return response.data;
-};
-
-export const registerDoctor = async (data: {
+export const register = async (data: {
+  name: string;
   email: string;
   password: string;
-  name: string;
-  specialty: string;
+  role: 'doctor' | 'patient';
+  specialty?: string;
 }) => {
-  const response = await api.post('/auth/register', { ...data, role: 'doctor' });
-  return response.data;
+  return api.post('/auth/register', data);
+};
+
+export const login = async (email: string, password: string, role: 'doctor' | 'patient') => {
+  return api.post('/auth/login', { email, password, role });
+};
+
+export const getCurrentUser = async () => {
+  return api.get('/auth/me');
 };
