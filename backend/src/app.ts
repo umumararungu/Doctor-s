@@ -1,19 +1,38 @@
 import express from 'express';
 import cors from 'cors';
-import doctorRoutes from './routes/doctorRoutes';
 import authRoutes from './routes/authRoutes';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './docs/swagger';
+import doctorRoutes from './routes/doctorRoutes';
+import patientRoutes from './routes/patientRoutes';
 import appointmentRoutes from './routes/appointmentRoutes';
-import paymentRoutes from './routes/paymentRoutes';
+import scheduleRoutes from './routes/scheduleRoutes';
+
 const app = express();
 
-// Middleware
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/doctors', doctorRoutes);
-app.use('/api/appointments', appointmentRoutes);
-app.use('/api/payments', paymentRoutes);
+// API routes
+app.use('/auth', authRoutes);
+app.use('/doctors', doctorRoutes);
+app.use('/patients', patientRoutes);
+app.use('/appointments', appointmentRoutes);
+app.use('/schedules', scheduleRoutes);
+
+
+// Health check route
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', uptime: process.uptime() });
+});
+
+// Home route
+app.get('/', (req, res) => {
+  res.send('Server is running! Welcome to the API.');
+});
+
+// Swagger docs
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 export default app;

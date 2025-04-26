@@ -1,52 +1,28 @@
 import { Request, Response } from 'express';
-import prisma from '../models';
-// import { validateSchedule } from '../utils/validation';
+import prisma from '../config/prisma';
 
-export const createSchedule = async (req: Request, res: Response) => {
-  const { doctorId } = req.params;
-  const { startTime, endTime } = req.body;
-
+export const getDoctors = async (req: Request, res: Response) => {
   try {
-    // Validate no schedule conflicts
-    const conflict = await prisma.schedule.findFirst({
-      where: {
-        doctorId: Number(doctorId),
-        OR: [
-          { startTime: { lt: endTime, gt: startTime } },
-          { endTime: { gt: startTime, lt: endTime } }
-        ]
-      }
-    });
-
-    if (conflict) {
-      return res.status(400).json({ error: 'Schedule conflict detected' });
-    }
-
-    const schedule = await prisma.schedule.create({
-      data: {
-        doctorId: Number(doctorId),
-        startTime: new Date(startTime),
-        endTime: new Date(endTime)
-      }
-    });
-
-    res.status(201).json(schedule);
+    const doctors = await prisma.doctor.findMany();
+    res.json(doctors);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create schedule' });
+    res.status(500).json({ error: 'Something went wrong' });
   }
 };
 
-export const getSchedules = async (req: Request, res: Response) => {
-  const { doctorId } = req.params;
-  
+export const getDoctorById = async (req: Request, res: Response) => {
+  const { id } = req.params;
   try {
-    const schedules = await prisma.schedule.findMany({
-      where: { doctorId: Number(doctorId) },
-      orderBy: { startTime: 'asc' }
+    const doctor = await prisma.doctor.findUnique({
+      where: { id: Number(id) },
     });
 
-    res.json(schedules);
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+
+    res.json(doctor);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch schedules' });
+    res.status(500).json({ error: 'Something went wrong' });
   }
 };
