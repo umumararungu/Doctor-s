@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prisma';
 
-export const getDoctors = async (req: Request, res: Response) => {
+export const getDoctors = async (req: Request, res: Response) :Promise<any>=> {
   try {
     const doctors = await prisma.doctor.findMany();
     res.json(doctors);
@@ -10,7 +10,7 @@ export const getDoctors = async (req: Request, res: Response) => {
   }
 };
 
-export const getDoctorById = async (req: Request, res: Response) => {
+export const getDoctorById = async (req: Request, res: Response) :Promise<any>=> {
   const { id } = req.params;
   try {
     const doctor = await prisma.doctor.findUnique({

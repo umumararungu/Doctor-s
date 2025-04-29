@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prisma';
 
-export const createAppointment = async (req: Request, res: Response) => {
+export const createAppointment = async (req: Request, res: Response) :Promise<any>=> {
   const { doctorId, patientId, scheduleId } = req.body;
   try {
     const appointment = await prisma.appointment.create({
@@ -24,7 +24,7 @@ export const createAppointment = async (req: Request, res: Response) => {
   }
 };
 
-export const getAppointments = async (req: Request, res: Response) => {
+export const getAppointments = async (req: Request, res: Response) :Promise<any>=> {
   try {
     const appointments = await prisma.appointment.findMany({
       include: { doctor: true, patient: true, schedule: true },
